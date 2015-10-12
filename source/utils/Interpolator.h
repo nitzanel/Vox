@@ -11,7 +11,7 @@
 // Revision History:
 //   Initial Revision - 23/02/12
 //
-// Copyright (c) 2005-2006, Steven Ball
+// Copyright (c) 2005-20015, Steven Ball
 //
 // ******************************************************************************
 

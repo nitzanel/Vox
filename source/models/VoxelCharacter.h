@@ -9,7 +9,7 @@
 // Revision History:
 //   Initial Revision - 24/07/14
 //
-// Copyright (c) 2005-2011, Steven Ball
+// Copyright (c) 2005-2015, Steven Ball
 //
 // ******************************************************************************
 
