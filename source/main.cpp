@@ -1,5 +1,8 @@
+#include "../glew/include/GL/glew.h"
+
 #include "Renderer/Renderer.h"
 #include "Renderer/camera.h"
+#include "models/VoxelCharacter.h"
 #include "utils/Interpolator.h"
 
 #include <windows.h>
@@ -49,7 +52,7 @@ int main(void)
 
 	/* Create cameras */
 	Camera* pGameCamera = new Camera(pRenderer);
-	pGameCamera->SetPosition(Vector3d(0.0f, 0.0f, 3.0f));
+	pGameCamera->SetPosition(Vector3d(0.0f, 1.25f, 3.0f));
 	pGameCamera->SetFacing(Vector3d(0.0f, 0.0f, -1.0f));
 	pGameCamera->SetUp(Vector3d(0.0f, 1.0f, 0.0f));
 	pGameCamera->SetRight(Vector3d(1.0f, 0.0f, 0.0f));
@@ -67,6 +70,34 @@ int main(void)
 	LARGE_INTEGER fps_ticksPerSecond;
 	QueryPerformanceCounter(&fps_previousTicks);
 	QueryPerformanceFrequency(&fps_ticksPerSecond);
+
+	/* Create the qubicle binary file manager */
+	QubicleBinaryManager* pQubicleBinaryManager = new QubicleBinaryManager(pRenderer);
+
+	/* Create test voxel character */
+	VoxelCharacter* pVoxelCharacter = new VoxelCharacter(pRenderer, pQubicleBinaryManager);
+	char characterBaseFolder[128];
+	char qbFilename[128];
+	char ms3dFilename[128];
+	char animListFilename[128];
+	char facesFilename[128];
+	char characterFilename[128];
+	string modelName = "Steve";
+	string typeName = "Human";
+	sprintf_s(characterBaseFolder, 128, "media/gamedata/models");
+	sprintf_s(qbFilename, 128, "media/gamedata/models/%s/%s.qb", typeName.c_str(), modelName.c_str());
+	sprintf_s(ms3dFilename, 128, "media/gamedata/models/%s/%s.ms3d", typeName.c_str(), typeName.c_str());
+	sprintf_s(animListFilename, 128, "media/gamedata/models/%s/%s.animlist", typeName.c_str(), typeName.c_str());
+	sprintf_s(facesFilename, 128, "media/gamedata/models/%s/%s.faces", typeName.c_str(), modelName.c_str());
+	sprintf_s(characterFilename, 128, "media/gamedata/models/%s/%s.character", typeName.c_str(), modelName.c_str());
+	pVoxelCharacter->LoadVoxelCharacter(typeName.c_str(), qbFilename, ms3dFilename, animListFilename, facesFilename, characterFilename, characterBaseFolder);
+	pVoxelCharacter->SetBreathingAnimationEnabled(true);
+	pVoxelCharacter->SetWinkAnimationEnabled(true);
+	pVoxelCharacter->SetTalkingAnimationEnabled(false);
+	pVoxelCharacter->SetRandomMouthSelection(true);
+	pVoxelCharacter->SetRandomLookDirection(false);
+	pVoxelCharacter->SetWireFrameRender(false);
+	pVoxelCharacter->SetCharacterScale(0.08f);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -86,9 +117,18 @@ int main(void)
 		// Update interpolator singleton
 		Interpolator::GetInstance()->Update();
 
+		// Update the voxel model
+		float animationSpeeds[AnimationSections_NUMSECTIONS] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+		Matrix4x4 worldMatrix;
+		pVoxelCharacter->Update(deltaTime, animationSpeeds);
+		pVoxelCharacter->UpdateWeaponTrails(deltaTime, worldMatrix);
+
 		// Begin rendering
 		pRenderer->BeginScene(true, true, true);
 
+		// ---------------------------------------
+		// Render 3d
+		// ---------------------------------------
 		pRenderer->PushMatrix();
 			// Set the default projection mode
 			pRenderer->SetProjectionMode(PM_PERSPECTIVE, defaultViewport);
@@ -96,17 +136,33 @@ int main(void)
 			// Set the lookat camera
 			pGameCamera->Look();
 
-			glBegin(GL_TRIANGLES);
-				glColor3f(1.0f, 0.0f, 0.0f);
-				glVertex3f(-1.0f, -1.0f, 0.0);
-				glColor3f(0.0f, 1.0f, 0.0f);
-				glVertex3f(1.0f, -1.0f, 0.0f);
-				glColor3f(0.0f, 0.0f, 1.0f);
-				glVertex3f(0.0f, 0.75f, 0.0f);
-			glEnd();
+			// Render the voxel character
+			Colour OulineColour(1.0f, 1.0f, 0.0f, 1.0f);
+			pRenderer->PushMatrix();
+				pRenderer->MultiplyWorldMatrix(worldMatrix);
+
+				pVoxelCharacter->RenderWeapons(false, false, false, OulineColour);
+				pVoxelCharacter->Render(false, false, false, OulineColour, false);
+			pRenderer->PopMatrix();
+
+			// Render the voxel character Face
+			pRenderer->PushMatrix();
+			pRenderer->MultiplyWorldMatrix(worldMatrix);
+				glActiveTextureARB(GL_TEXTURE0_ARB);
+				glDisable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				pVoxelCharacter->RenderFace();
+			pRenderer->PopMatrix();
 
 		pRenderer->PopMatrix();
 
+		// ---------------------------------------
+		// Render 2d
+		// ---------------------------------------
+		glActiveTextureARB(GL_TEXTURE0_ARB);
+		glDisable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		char lFPSBuff[128];
 		sprintf_s(lFPSBuff, "FPS: %.0f  Delta: %.4f", fps, deltaTime);
 

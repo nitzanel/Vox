@@ -17,6 +17,15 @@
 
 #include "Renderer.h"
 
+bool useGLSL = false;
+bool extensions_init = false;
+bool bGeometryShader = false;
+bool bGPUShader4 = false;
+bool HasGeometryShaderSupport();
+bool HasGLSLSupport();
+bool InitOpenGLExtensions();
+bool HasShaderModel4();
+
 
 Renderer::Renderer(int width, int height, int depthBits, int stencilBits)
 {
@@ -52,6 +61,8 @@ Renderer::Renderer(int width, int height, int depthBits, int stencilBits)
 	m_cullMode = CM_NOCULL;
 	m_primativeMode = PM_TRIANGLES;
 	m_activeViewport = -1;
+
+	InitOpenGLExtensions();
 }
 
 Renderer::~Renderer()
@@ -113,6 +124,7 @@ void Renderer::ResizeWindow(int newWidth, int newHeight)
 	m_windowWidth = newWidth;
 	m_windowHeight = newHeight;
 }
+
 // Viewport
 bool Renderer::CreateViewport(int bottom, int left, int width, int height, float fov, unsigned int *pID)
 {
@@ -1976,4 +1988,112 @@ int Renderer::CubeInFrustum(unsigned int frustumid, const Vector3d &center, floa
 	Frustum* pFrustum = m_frustums[frustumid];
 
 	return pFrustum->CubeInFrustum(center, x, y, z);
+}
+
+bool InitOpenGLExtensions()
+{
+	if (extensions_init)
+		return true;
+
+	extensions_init = true;
+
+	glewExperimental = GL_TRUE;
+	GLenum err = glewInit();
+
+	if (GLEW_OK != err)
+	{
+		cout << "Error:" << glewGetErrorString(err) << endl;
+		extensions_init = false;
+		return false;
+	}
+
+	cout << "OpenGL Vendor: " << (char*)glGetString(GL_VENDOR) << "\n";
+	cout << "OpenGL Renderer: " << (char*)glGetString(GL_RENDERER) << "\n";
+	cout << "OpenGL Version: " << (char*)glGetString(GL_VERSION) << "\n\n";
+	//cout << "OpenGL Extensions:\n" << (char*) glGetString(GL_EXTENSIONS) << "\n\n";
+
+	HasGLSLSupport();
+
+	return true;
+}
+
+// OpenGL Extensions
+bool HasGLSLSupport()
+{
+	bGeometryShader = HasGeometryShaderSupport();
+	bGPUShader4 = HasShaderModel4();
+
+	if (useGLSL)
+		return true;  // already initialized and GLSL is available
+	useGLSL = true;
+
+	if (!extensions_init)
+		InitOpenGLExtensions();  // extensions were not yet initialized!!
+
+
+	if (GLEW_VERSION_2_0)
+	{
+		cout << "OpenGL 2.0 (or higher) is available!" << endl;
+	}
+	else if (GLEW_VERSION_1_5)
+	{
+		cout << "OpenGL 1.5 core functions are available" << endl;
+	}
+	else if (GLEW_VERSION_1_4)
+	{
+		cout << "OpenGL 1.4 core functions are available" << endl;
+	}
+	else if (GLEW_VERSION_1_3)
+	{
+		cout << "OpenGL 1.3 core functions are available" << endl;
+	}
+	else if (GLEW_VERSION_1_2)
+	{
+		cout << "OpenGL 1.2 core functions are available" << endl;
+	}
+
+	if (GL_TRUE != glewGetExtension("GL_ARB_fragment_shader"))
+	{
+		cout << "[WARNING] GL_ARB_fragment_shader extension is not available!\n";
+		useGLSL = false;
+	}
+
+	if (GL_TRUE != glewGetExtension("GL_ARB_vertex_shader"))
+	{
+		cout << "[WARNING] GL_ARB_vertex_shader extension is not available!\n";
+		useGLSL = false;
+	}
+
+	if (GL_TRUE != glewGetExtension("GL_ARB_shader_objects"))
+	{
+		cout << "[WARNING] GL_ARB_shader_objects extension is not available!\n";
+		useGLSL = false;
+	}
+
+	if (useGLSL)
+	{
+		cout << "[OK] OpenGL Shading Language is available!\n\n";
+	}
+	else
+	{
+		cout << "[FAILED] OpenGL Shading Language is not available...\n\n";
+	}
+
+	return useGLSL;
+}
+
+bool HasGeometryShaderSupport()
+{
+	if (GL_TRUE != glewGetExtension("GL_EXT_geometry_shader4"))
+		return false;
+
+	return true;
+}
+
+bool HasShaderModel4()
+{
+	if (GL_TRUE != glewGetExtension("GL_EXT_gpu_shader4"))
+		return false;
+
+	return true;
 }
