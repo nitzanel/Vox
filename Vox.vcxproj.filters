@@ -1,18 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="source">
+      <UniqueIdentifier>{fb4776c8-27f8-4265-8c1d-13c8ac85d0bf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    <Filter Include="source\glew">
+      <UniqueIdentifier>{7d4cfcce-2df7-4e25-9670-d5f058a170b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\glew\src">
+      <UniqueIdentifier>{05201492-9f43-4342-869c-2e8c095546a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\glew\include">
+      <UniqueIdentifier>{bb903b1b-8bc4-4d52-b851-6484be55b6b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\glew\include\GL">
+      <UniqueIdentifier>{311296e4-39b2-4bba-865d-493a3fc79dcc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\main.cpp">
+      <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="source\glew\src\glew.c">
+      <Filter>source\glew\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\glew\include\GL\glew.h">
+      <Filter>source\glew\include\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="source\glew\include\GL\glxew.h">
+      <Filter>source\glew\include\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="source\glew\include\GL\wglew.h">
+      <Filter>source\glew\include\GL</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
