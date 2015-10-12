@@ -20,7 +20,7 @@ int main(void)
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
 
-	/* Create a windowed mode window and its OpenGL context */
+	/* Create a windowed mode window and it's OpenGL context */
 	int windowWidth = 800;
 	int windowHeight = 800;
 	window = glfwCreateWindow(windowWidth, windowHeight, "Vox", NULL, NULL);
@@ -39,7 +39,7 @@ int main(void)
 	
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	//glfwSwapInterval(0); // Disable v-sync
 
 	/* Create the renderer */
 	Renderer* pRenderer = new Renderer(windowWidth, windowHeight, 32, 8);
@@ -52,10 +52,27 @@ int main(void)
 	unsigned int m_defaultFont;
 	pRenderer->CreateFreeTypeFont("media/fonts/arial.ttf", 12, &m_defaultFont);
 
+	/* Setup the FPS counters */
+	LARGE_INTEGER fps_previousTicks;
+	LARGE_INTEGER fps_ticksPerSecond;
+	QueryPerformanceCounter(&fps_previousTicks);
+	QueryPerformanceFrequency(&fps_ticksPerSecond);
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-		/* Render here */
+		// Delta time
+		double timeNow = (double)timeGetTime() / 1000.0;
+		static double timeOld = timeNow - (1.0 / 50.0);
+		float deltaTime = (float)timeNow - (float)timeOld;
+		timeOld = timeNow;
+
+		// FPS
+		LARGE_INTEGER fps_currentTicks;
+		QueryPerformanceCounter(&fps_currentTicks);
+		float fps = 1.0f / ((float)(fps_currentTicks.QuadPart - fps_previousTicks.QuadPart) / (float)fps_ticksPerSecond.QuadPart);
+		fps_previousTicks = fps_currentTicks;
+
 		pRenderer->BeginScene(true, true, true);
 
 		pRenderer->PushMatrix();
@@ -73,12 +90,14 @@ int main(void)
 
 		pRenderer->PopMatrix();
 
+		char lFPSBuff[128];
+		sprintf_s(lFPSBuff, "FPS: %.0f  Delta: %.4f", fps, deltaTime);
+
 		pRenderer->PushMatrix();
 			pRenderer->SetProjectionMode(PM_2D, m_defaultViewport);
-
 			pRenderer->SetLookAtCamera(Vector3d(0.0f, 0.0f, 50.0f), Vector3d(0.0f, 0.0f, 0.0f), Vector3d(0.0f, 1.0f, 0.0f));
 
-			pRenderer->RenderFreeTypeText(m_defaultFont, 10.0f, 10.0f, 0.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, "Test Text");
+			pRenderer->RenderFreeTypeText(m_defaultFont, 10.0f, 10.0f, 0.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, lFPSBuff);
 		pRenderer->PopMatrix();
 
 		pRenderer->EndScene();
