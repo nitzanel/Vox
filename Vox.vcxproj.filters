@@ -19,6 +19,12 @@
     <Filter Include="source\freetype">
       <UniqueIdentifier>{68527aff-0e7e-430a-8de8-426de2846f34}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\Renderer">
+      <UniqueIdentifier>{073942b3-8f28-4932-bc1f-f5c170cf43b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\Maths">
+      <UniqueIdentifier>{360dfc67-3c32-422b-a8b5-451fa8c9c4f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -29,6 +35,45 @@
     </ClCompile>
     <ClCompile Include="source\freetype\freetypefont.cpp">
       <Filter>source\freetype</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Renderer\Renderer.cpp">
+      <Filter>source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\3dmaths.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\Bezier3.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\Bezier4.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\Line3D.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\matrix3x3.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\matrix4x4.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\Plane3D.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\quaternion.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\vector2d.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Maths\vector3d.cpp">
+      <Filter>source\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Renderer\frustum.cpp">
+      <Filter>source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Renderer\colour.cpp">
+      <Filter>source\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +88,24 @@
     </ClInclude>
     <ClInclude Include="source\freetype\freetypefont.h">
       <Filter>source\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Renderer\Renderer.h">
+      <Filter>source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Maths\3dGeometry.h">
+      <Filter>source\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Maths\3dmaths.h">
+      <Filter>source\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Renderer\frustum.h">
+      <Filter>source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Renderer\viewport.h">
+      <Filter>source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Renderer\colour.h">
+      <Filter>source\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

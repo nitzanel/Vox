@@ -22,12 +22,31 @@
     <ClCompile Include="source\freetype\freetypefont.cpp" />
     <ClCompile Include="source\glew\src\glew.c" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\Maths\3dmaths.cpp" />
+    <ClCompile Include="source\Maths\Bezier3.cpp" />
+    <ClCompile Include="source\Maths\Bezier4.cpp" />
+    <ClCompile Include="source\Maths\Line3D.cpp" />
+    <ClCompile Include="source\Maths\matrix3x3.cpp" />
+    <ClCompile Include="source\Maths\matrix4x4.cpp" />
+    <ClCompile Include="source\Maths\Plane3D.cpp" />
+    <ClCompile Include="source\Maths\quaternion.cpp" />
+    <ClCompile Include="source\Maths\vector2d.cpp" />
+    <ClCompile Include="source\Maths\vector3d.cpp" />
+    <ClCompile Include="source\Renderer\colour.cpp" />
+    <ClCompile Include="source\Renderer\frustum.cpp" />
+    <ClCompile Include="source\Renderer\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\freetype\freetypefont.h" />
     <ClInclude Include="source\glew\include\GL\glew.h" />
     <ClInclude Include="source\glew\include\GL\glxew.h" />
     <ClInclude Include="source\glew\include\GL\wglew.h" />
+    <ClInclude Include="source\Maths\3dGeometry.h" />
+    <ClInclude Include="source\Maths\3dmaths.h" />
+    <ClInclude Include="source\Renderer\colour.h" />
+    <ClInclude Include="source\Renderer\frustum.h" />
+    <ClInclude Include="source\Renderer\Renderer.h" />
+    <ClInclude Include="source\Renderer\viewport.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4496164E-D363-42DC-84E8-64D61B812689}</ProjectGuid>

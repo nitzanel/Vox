@@ -1,6 +1,6 @@
 #include <GLFW/glfw3.h>
 
-#include "freetypefont.h"
+#include "Renderer/Renderer.h"
 
 #include <windows.h>
 #include <gl/gl.h>
@@ -21,7 +21,9 @@ int main(void)
 		exit(EXIT_FAILURE);
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(800, 800, "Vox", NULL, NULL);
+	int windowWidth = 800;
+	int windowHeight = 800;
+	window = glfwCreateWindow(windowWidth, windowHeight, "Vox", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -39,36 +41,47 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
+	/* Create the renderer */
+	Renderer* pRenderer = new Renderer(windowWidth, windowHeight, 32, 8);
+
+	// Create game viewport
+	unsigned int m_defaultViewport;
+	pRenderer->CreateViewport(0, 0, windowWidth, windowHeight, 60.0f, &m_defaultViewport);
+
 	/* Create fonts */
-	FreeTypeFont* font = new FreeTypeFont();
-	font->BuildFont("media/fonts/arial.ttf", 18);
+	unsigned int m_defaultFont;
+	pRenderer->CreateFreeTypeFont("media/fonts/arial.ttf", 12, &m_defaultFont);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
-		float ratio;
-		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
-		ratio = width / (float)height;
+		pRenderer->BeginScene(true, true, true);
 
-		glViewport(0, 0, width, height);
-		glClear(GL_COLOR_BUFFER_BIT);
+		pRenderer->PushMatrix();
+			pRenderer->SetProjectionMode(PM_2D, m_defaultViewport);
+			pRenderer->SetLookAtCamera(Vector3d(0.0f, 0.0f, 50.0f), Vector3d(0.0f, 0.0f, 0.0f), Vector3d(0.0f, 1.0f, 0.0f));
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(-ratio, ratio, -1.0f, 1.0f, 1.0f, -1.0f);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
+			glBegin(GL_TRIANGLES);
+				glColor3f(1.0f, 0.0f, 0.0f);
+				glVertex3f(50.0f, 50.0f, 0.0);
+				glColor3f(0.0f, 1.0f, 0.0f);
+				glVertex3f(100.0f, 50.0f, 0.0f);
+				glColor3f(0.0f, 0.0f, 1.0f);
+				glVertex3f(75.0f, 100.0f, 0.0f);
+			glEnd();
 
-		glBegin(GL_TRIANGLES);
-			glColor3f(1.0f, 0.0f, 0.0f);
-			glVertex3f(-0.6f, -0.4f, 0.0);
-			glColor3f(0.0f, 1.0f, 0.0f);
-			glVertex3f(0.6f, -0.4f, 0.0f);
-			glColor3f(0.0f, 0.0f, 1.0f);
-			glVertex3f(0.0f, 0.6f, 0.0f);
-		glEnd();
+		pRenderer->PopMatrix();
+
+		pRenderer->PushMatrix();
+			pRenderer->SetProjectionMode(PM_2D, m_defaultViewport);
+
+			pRenderer->SetLookAtCamera(Vector3d(0.0f, 0.0f, 50.0f), Vector3d(0.0f, 0.0f, 0.0f), Vector3d(0.0f, 1.0f, 0.0f));
+
+			pRenderer->RenderFreeTypeText(m_defaultFont, 10.0f, 10.0f, 0.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, "Test Text");
+		pRenderer->PopMatrix();
+
+		pRenderer->EndScene();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
