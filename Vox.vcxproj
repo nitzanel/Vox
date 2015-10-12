@@ -32,9 +32,14 @@
     <ClCompile Include="source\Maths\quaternion.cpp" />
     <ClCompile Include="source\Maths\vector2d.cpp" />
     <ClCompile Include="source\Maths\vector3d.cpp" />
+    <ClCompile Include="source\Renderer\bmp.cpp" />
+    <ClCompile Include="source\Renderer\bmp_class.cpp" />
     <ClCompile Include="source\Renderer\colour.cpp" />
     <ClCompile Include="source\Renderer\frustum.cpp" />
+    <ClCompile Include="source\Renderer\mesh.cpp" />
     <ClCompile Include="source\Renderer\Renderer.cpp" />
+    <ClCompile Include="source\Renderer\texture.cpp" />
+    <ClCompile Include="source\Renderer\tga.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\freetype\freetypefont.h" />
@@ -43,9 +48,16 @@
     <ClInclude Include="source\glew\include\GL\wglew.h" />
     <ClInclude Include="source\Maths\3dGeometry.h" />
     <ClInclude Include="source\Maths\3dmaths.h" />
+    <ClInclude Include="source\Renderer\bmp_class.h" />
     <ClInclude Include="source\Renderer\colour.h" />
     <ClInclude Include="source\Renderer\frustum.h" />
+    <ClInclude Include="source\Renderer\light.h" />
+    <ClInclude Include="source\Renderer\material.h" />
+    <ClInclude Include="source\Renderer\mesh.h" />
     <ClInclude Include="source\Renderer\Renderer.h" />
+    <ClInclude Include="source\Renderer\texture.h" />
+    <ClInclude Include="source\Renderer\tga.h" />
+    <ClInclude Include="source\Renderer\vertexarray.h" />
     <ClInclude Include="source\Renderer\viewport.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
