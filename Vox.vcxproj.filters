@@ -16,6 +16,9 @@
     <Filter Include="source\glew\include\GL">
       <UniqueIdentifier>{311296e4-39b2-4bba-865d-493a3fc79dcc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\freetype">
+      <UniqueIdentifier>{68527aff-0e7e-430a-8de8-426de2846f34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -23,6 +26,9 @@
     </ClCompile>
     <ClCompile Include="source\glew\src\glew.c">
       <Filter>source\glew\src</Filter>
+    </ClCompile>
+    <ClCompile Include="source\freetype\freetypefont.cpp">
+      <Filter>source\freetype</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +40,9 @@
     </ClInclude>
     <ClInclude Include="source\glew\include\GL\wglew.h">
       <Filter>source\glew\include\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="source\freetype\freetypefont.h">
+      <Filter>source\freetype</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
