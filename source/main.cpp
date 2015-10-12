@@ -20,7 +20,6 @@ int main(void)
 	}
 
 	/* Center on screen */
-	int left, top, right, bottom;
 	int width;
 	int height;
 	const GLFWvidmode* vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -30,6 +29,9 @@ int main(void)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
+
+	/* Create fonts */
+	//FreeTypeFont* font = new FreeTypeFont();
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
