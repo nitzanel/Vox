@@ -95,7 +95,7 @@ int main(void)
 	pVoxelCharacter->SetWinkAnimationEnabled(true);
 	pVoxelCharacter->SetTalkingAnimationEnabled(false);
 	pVoxelCharacter->SetRandomMouthSelection(true);
-	pVoxelCharacter->SetRandomLookDirection(false);
+	pVoxelCharacter->SetRandomLookDirection(true);
 	pVoxelCharacter->SetWireFrameRender(false);
 	pVoxelCharacter->SetCharacterScale(0.08f);
 
@@ -167,6 +167,7 @@ int main(void)
 		sprintf_s(lFPSBuff, "FPS: %.0f  Delta: %.4f", fps, deltaTime);
 
 		pRenderer->PushMatrix();
+			pRenderer->SetRenderMode(RM_SOLID);
 			pRenderer->SetProjectionMode(PM_2D, defaultViewport);
 			pRenderer->SetLookAtCamera(Vector3d(0.0f, 0.0f, 50.0f), Vector3d(0.0f, 0.0f, 0.0f), Vector3d(0.0f, 1.0f, 0.0f));
 
