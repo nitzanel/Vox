@@ -65,6 +65,7 @@ bool Texture::Load(string fileName, int *width, int *height, int *width_power2, 
 	if(strstr(fileName.c_str(), ".jpg"))
 	{
 		// TODO : Add back in JPG support
+
 		// JPG
 		//loaded = LoadFileJPG(fileName.c_str(), &texdata, width, height) == 1;
 

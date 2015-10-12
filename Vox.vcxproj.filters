@@ -25,6 +25,12 @@
     <Filter Include="source\Maths">
       <UniqueIdentifier>{360dfc67-3c32-422b-a8b5-451fa8c9c4f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="source\models">
+      <UniqueIdentifier>{08a44df0-0358-4c9f-a851-6bbbf8084d24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\utils">
+      <UniqueIdentifier>{187a17fc-3674-43d7-84c9-234f7d3f3d32}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -90,6 +96,39 @@
     <ClCompile Include="source\Renderer\bmp.cpp">
       <Filter>source\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="source\models\BoundingBox.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\objmodel.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\MS3DModel.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\MS3DAnimator.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\QubicleBinary.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\QubicleBinaryManager.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\VoxelCharacter.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\VoxelWeapon.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\models\VoxelObject.cpp">
+      <Filter>source\models</Filter>
+    </ClCompile>
+    <ClCompile Include="source\utils\Interpolator.cpp">
+      <Filter>source\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Renderer\camera.cpp">
+      <Filter>source\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\glew\include\GL\glew.h">
@@ -141,6 +180,45 @@
       <Filter>source\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="source\Renderer\bmp_class.h">
+      <Filter>source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\BoundingBox.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\modelloader.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\OBJModel.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\MS3DModel.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\MS3DAnimator.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\QubicleBinary.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\QubicleBinaryManager.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\VoxelCharacter.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\VoxelWeapon.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\models\VoxelObject.h">
+      <Filter>source\models</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utils\Interpolator.h">
+      <Filter>source\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="source\utils\Random.h">
+      <Filter>source\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Renderer\camera.h">
       <Filter>source\Renderer</Filter>
     </ClInclude>
   </ItemGroup>

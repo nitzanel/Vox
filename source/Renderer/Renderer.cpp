@@ -13,6 +13,8 @@
 //
 // ******************************************************************************
 
+#include "../glew/include/GL/glew.h"
+
 #include "Renderer.h"
 
 
@@ -49,6 +51,7 @@ Renderer::Renderer(int width, int height, int depthBits, int stencilBits)
 	// Initialize defaults
 	m_cullMode = CM_NOCULL;
 	m_primativeMode = PM_TRIANGLES;
+	m_activeViewport = -1;
 }
 
 Renderer::~Renderer()
@@ -237,6 +240,11 @@ bool Renderer::ResizeViewport(unsigned int viewportid, int bottom, int left, int
 	return true;
 }
 
+int Renderer::GetActiveViewPort()
+{
+	return m_activeViewport;
+}
+
 // Render modes
 void Renderer::SetRenderMode(RenderMode mode)
 {
@@ -328,11 +336,23 @@ CullMode Renderer::GetCullMode()
 	return m_cullMode;
 }
 
+void Renderer::SetLineWidth(float width)
+{
+	glLineWidth(width);
+}
+
+void Renderer::SetPointSize(float width)
+{
+	glPointSize(width);
+}
+
 // Projection
 bool Renderer::SetProjectionMode(ProjectionMode mode, int viewPort)
 {
 	Viewport* pVeiwport = m_viewports[viewPort];
 	glViewport(pVeiwport->Left, pVeiwport->Bottom, pVeiwport->Width, pVeiwport->Height);
+
+	m_activeViewport = viewPort;
 
 	if (mode == PM_PERSPECTIVE) {
 		m_projection = &(pVeiwport->Perspective);
@@ -429,6 +449,31 @@ void Renderer::SetWorldMatrix(const Matrix4x4& mat)
 	glLoadMatrixf(m);
 }
 
+void Renderer::GetModelViewMatrix(Matrix4x4 *pMat)
+{
+	float mat[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, mat);
+	memcpy(pMat->m, mat, 16 * sizeof(float));
+}
+
+void Renderer::GetModelMatrix(Matrix4x4 *pMat)
+{
+	memcpy(pMat->m, m_model.m, 16 * sizeof(float));
+}
+
+void Renderer::GetViewMatrix(Matrix4x4 *pMat)
+{
+	memcpy(pMat->m, m_view.m, 16 * sizeof(float));
+}
+
+void Renderer::GetProjectionMatrix(Matrix4x4 *pMat)
+{
+	float mat[16];
+	glGetFloatv(GL_PROJECTION_MATRIX, mat);
+	memcpy(pMat->m, mat, 16 * sizeof(float));
+	//memcpy(pMat->m, m_projection->m, 16 * sizeof(float));
+}
+
 void Renderer::IdentityWorldMatrix()
 {
 	glLoadIdentity();
@@ -436,10 +481,273 @@ void Renderer::IdentityWorldMatrix()
 	m_model.LoadIdentity();
 }
 
+void Renderer::MultiplyWorldMatrix(const Matrix4x4 &mat)
+{
+	float m[16];
+	mat.GetMatrix(m);
+	glMultMatrixf(m);
+
+	Matrix4x4 world(mat);
+	m_model = world * m_model;
+}
+
+void Renderer::TranslateWorldMatrix(float x, float y, float z)
+{
+	glTranslatef(x, y, z);
+
+	Matrix4x4 translate;
+	translate.SetTranslation(Vector3d(x, y, z));
+	m_model = translate * m_model;
+}
+
+void Renderer::RotateWorldMatrix(float x, float y, float z)
+{
+	// Posible gimbal lock?
+	glRotatef(z, 0.0f, 0.0f, 1.0f);
+	glRotatef(y, 0.0f, 1.0f, 0.0f);
+	glRotatef(x, 1.0f, 0.0f, 0.0f);
+
+	Matrix4x4 rotX;
+	Matrix4x4 rotY;
+	Matrix4x4 rotZ;
+	rotX.SetXRotation(DegToRad(x));
+	rotY.SetYRotation(DegToRad(y));
+	rotZ.SetZRotation(DegToRad(z));
+
+	m_model = rotZ * rotY * rotX * m_model;
+}
+
+void Renderer::ScaleWorldMatrix(float x, float y, float z)
+{
+	glScalef(x, y, z);
+
+	Matrix4x4 scale;
+	scale.SetScale(Vector3d(x, y, z));
+	m_model = scale * m_model;
+}
+
+// Texture matrix manipulations
+void Renderer::SetTextureMatrix()
+{
+	static double modelView[16];
+	static double projection[16];
+
+	// This is matrix transform every coordinate x,y,z
+	// x = x* 0.5 + 0.5 
+	// y = y* 0.5 + 0.5 
+	// z = z* 0.5 + 0.5 
+	// Moving from unit cube [-1,1] to [0,1]  
+	const GLdouble bias[16] = {
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0 };
+
+	// Grab modelview and transformation matrices
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelView);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+
+	glMatrixMode(GL_TEXTURE);
+	glActiveTextureARB(GL_TEXTURE7);
+
+	glLoadIdentity();
+	glLoadMatrixd(bias);
+
+	// concatating all matrice into one.
+	glMultMatrixd(projection);
+	glMultMatrixd(modelView);
+
+	// Go back to normal matrix mode
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void Renderer::PushTextureMatrix()
+{
+	glMatrixMode(GL_TEXTURE);
+	glActiveTextureARB(GL_TEXTURE7);
+	glPushMatrix();
+}
+
+void Renderer::PopTextureMatrix()
+{
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
 // Camera functionality
 void Renderer::SetLookAtCamera(Vector3d pos, Vector3d target, Vector3d up)
 {
 	gluLookAt(pos.x, pos.y, pos.z, target.x, target.y, target.z, up.x, up.y, up.z);
+}
+
+// Transparency
+void Renderer::EnableTransparency(BlendFunction source, BlendFunction destination)
+{
+	glDisable(GL_DEPTH_WRITEMASK);
+	glEnable(GL_BLEND);
+	glBlendFunc(GetBlendEnum(source), GetBlendEnum(destination));
+}
+
+void Renderer::DisableTransparency()
+{
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_WRITEMASK);
+}
+
+GLenum Renderer::GetBlendEnum(BlendFunction flag)
+{
+	GLenum glFlag;
+	switch (flag)
+	{
+	case BF_ONE:
+		glFlag = GL_ONE;
+		break;
+	case BF_ZERO:
+		glFlag = GL_ZERO;
+		break;
+	case BF_SRC_ALPHA:
+		glFlag = GL_SRC_ALPHA;
+		break;
+	case BF_ONE_MINUS_SRC_ALPHA:
+		glFlag = GL_ONE_MINUS_SRC_ALPHA;
+		break;
+	}
+
+	return glFlag;
+}
+
+// Depth testing
+void Renderer::EnableDepthTest(DepthTest lTestFunction)
+{
+	glEnable(GL_DEPTH_TEST);
+
+	glDepthFunc(GetDepthTest(lTestFunction));
+}
+
+void Renderer::DisableDepthTest()
+{
+	glDisable(GL_DEPTH_TEST);
+}
+
+GLenum Renderer::GetDepthTest(DepthTest lTest)
+{
+	GLenum glFlag;
+	switch (lTest)
+	{
+	case DT_NEVER:
+		glFlag = GL_NEVER;
+		break;
+	case DT_ALWAYS:
+		glFlag = GL_ALWAYS;
+		break;
+	case DT_LESS:
+		glFlag = GL_LESS;
+		break;
+	case DT_LEQUAL:
+		glFlag = GL_LEQUAL;
+		break;
+	case DT_EQUAL:
+		glFlag = GL_EQUAL;
+		break;
+	case DT_GEQUAL:
+		glFlag = GL_GEQUAL;
+		break;
+	case DT_GREATER:
+		glFlag = GL_GREATER;
+		break;
+	case DT_NOTEQUAL:
+		glFlag = GL_NOTEQUAL;
+		break;
+	}
+
+	return glFlag;
+}
+
+void Renderer::EnableDepthWrite()
+{
+	glDepthMask(GL_TRUE);
+}
+
+void Renderer::DisableDepthWrite()
+{
+	glDepthMask(GL_FALSE);
+}
+
+// Immediate mode
+void Renderer::EnableImmediateMode(ImmediateModePrimitive mode)
+{
+	GLenum glMode;
+	switch (mode)
+	{
+	case IM_POINTS:
+		glMode = GL_POINTS;
+		break;
+	case IM_LINES:
+		glMode = GL_LINES;
+		break;
+	case IM_LINE_LOOP:
+		glMode = GL_LINE_LOOP;
+		break;
+	case IM_LINE_STRIP:
+		glMode = GL_LINE_STRIP;
+		break;
+	case IM_TRIANGLES:
+		glMode = GL_TRIANGLES;
+		break;
+	case IM_TRIANGLE_STRIP:
+		glMode = GL_TRIANGLE_STRIP;
+		break;
+	case IM_TRIANGLE_FAN:
+		glMode = GL_TRIANGLE_FAN;
+		break;
+	case IM_QUADS:
+		glMode = GL_QUADS;
+		break;
+	case IM_QUAD_STRIP:
+		glMode = GL_QUAD_STRIP;
+		break;
+	case IM_POLYGON:
+		glMode = GL_POLYGON;
+		break;
+	}
+
+	glBegin(glMode);
+}
+
+void Renderer::ImmediateVertex(float x, float y, float z)
+{
+	glVertex3f(x, y, z);
+}
+
+void Renderer::ImmediateVertex(int x, int y, int z)
+{
+	glVertex3i(x, y, z);
+}
+
+void Renderer::ImmediateNormal(float x, float y, float z)
+{
+	glNormal3f(x, y, z);
+}
+
+void Renderer::ImmediateNormal(int x, int y, int z)
+{
+	glNormal3i(x, y, z);
+}
+
+void Renderer::ImmediateTextureCoordinate(float s, float t)
+{
+	glTexCoord2f(s, t);
+}
+
+void Renderer::ImmediateColourAlpha(float r, float g, float b, float a)
+{
+	glColor4f(r, g, b, a);
+}
+
+void Renderer::DisableImmediateMode()
+{
+	glEnd();
 }
 
 // Text rendering
@@ -1476,4 +1784,196 @@ void Renderer::GetMeshInformation(int *numVerts, int *numTris, OpenGLTriangleMes
 {
 	*numVerts = (int)pMesh->m_vertices.size();
 	*numTris = (int)pMesh->m_triangles.size();
+}
+
+void Renderer::StartMeshRender()
+{
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+}
+
+void Renderer::EndMeshRender()
+{
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+}
+
+bool Renderer::MeshStaticBufferRender(OpenGLTriangleMesh* pMesh)
+{
+	SetPrimativeMode(PM_TRIANGLES);
+	//SetRenderMode(RM_SOLID);
+
+	VertexArray *pVertexArray = m_vertexArrays[pMesh->m_staticMeshId];
+
+	if (pVertexArray != NULL)
+	{
+		if (pVertexArray->nVerts == 0)
+		{
+			return false;
+		}
+
+		if ((pVertexArray->type != VT_POSITION_DIFFUSE_ALPHA) && (pVertexArray->type != VT_POSITION_DIFFUSE))
+		{
+			if (pVertexArray->materialID != -1)
+			{
+				m_materials[pVertexArray->materialID]->Apply();
+			}
+		}
+
+		if (pVertexArray->type == VT_POSITION_NORMAL_UV || pVertexArray->type == VT_POSITION_NORMAL_UV_COLOUR)
+		{
+			if (pVertexArray->textureID != -1)
+			{
+				BindTexture(pVertexArray->textureID);
+			}
+		}
+
+		// Calculate the stride
+		GLsizei totalStride = GetStride(pVertexArray->type);
+
+		glVertexPointer(3, GL_FLOAT, totalStride, pVertexArray->pVA);
+
+		if (pVertexArray->type == VT_POSITION_NORMAL || pVertexArray->type == VT_POSITION_NORMAL_UV || pVertexArray->type == VT_POSITION_NORMAL_UV_COLOUR || pVertexArray->type == VT_POSITION_NORMAL_COLOUR)
+		{
+			glNormalPointer(GL_FLOAT, totalStride, &pVertexArray->pVA[3]);
+		}
+
+		if (pVertexArray->type == VT_POSITION_NORMAL_UV || pVertexArray->type == VT_POSITION_NORMAL_UV_COLOUR)
+		{
+			glTexCoordPointer(2, GL_FLOAT, 0, pVertexArray->pTextureCoordinates);
+		}
+
+		if (pVertexArray->type == VT_POSITION_DIFFUSE_ALPHA)
+		{
+			glColorPointer(4, GL_FLOAT, totalStride, &pVertexArray->pVA[3]);
+		}
+
+		if (pVertexArray->type == VT_POSITION_DIFFUSE)
+		{
+			glColorPointer(3, GL_FLOAT, totalStride, &pVertexArray->pVA[3]);
+		}
+
+		if (pVertexArray->type == VT_POSITION_NORMAL_UV_COLOUR || pVertexArray->type == VT_POSITION_NORMAL_COLOUR)
+		{
+			glColorPointer(4, GL_FLOAT, totalStride, &pVertexArray->pVA[6]);
+		}
+
+		if (pVertexArray->nIndices != 0)
+		{
+			glDrawElements(m_primativeMode, pVertexArray->nIndices, GL_UNSIGNED_INT, pVertexArray->pIndices);
+		}
+		else
+		{
+			glDrawArrays(m_primativeMode, 0, pVertexArray->nVerts);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+// Name rendering and name picking
+void Renderer::InitNameStack()
+{
+	glInitNames();
+
+	glPushName(-1);
+}
+
+void Renderer::LoadNameOntoStack(int lName)
+{
+	glPopName();
+	glPushName(lName);
+	//glLoadName(lName);
+}
+
+void Renderer::EndNameStack()
+{
+	glPopName();
+}
+
+void Renderer::StartNamePicking(unsigned int lViewportid, int lX, int lY)
+{
+	ClearScene(true, true, true);
+
+	glSelectBuffer(NAME_PICKING_BUFFER, m_SelectBuffer);
+
+	glRenderMode(GL_SELECT);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	int	viewportCoords[4] = { 0, 0, 0, 0 };
+	glGetIntegerv(GL_VIEWPORT, viewportCoords);
+	gluPickMatrix(lX, lY, 3, 3, viewportCoords);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	MultViewProjection();
+}
+
+int Renderer::GetPickedObject()
+{
+	int objectsFound = 0;
+	objectsFound = glRenderMode(GL_RENDER);
+
+	if (objectsFound > 0)
+	{
+		unsigned int lowestDepth = m_SelectBuffer[1];
+
+		int selectedObject = m_SelectBuffer[3];
+
+		// Any time that we find more than one named object, we choose the one with the lowest depth. i.e Closest to the screen
+		for (int i = 1; i < objectsFound; i++)
+		{
+			unsigned int lDepth = m_SelectBuffer[(i * 4) + 1];
+			int lname = m_SelectBuffer[(i * 4) + 3];
+
+			// Also make sure that a name of -1 doesnt ever take priority
+			if (lDepth < lowestDepth && lname != -1)
+			{
+				lowestDepth = m_SelectBuffer[(i * 4) + 1];
+
+				selectedObject = m_SelectBuffer[(i * 4) + 3];
+			}
+		}
+
+		return selectedObject;
+	}
+
+	//No objects found
+	return -1;
+}
+
+// Frustum
+Frustum* Renderer::GetFrustum(unsigned int frustumid)
+{
+	Frustum* pFrustum = m_frustums[frustumid];
+
+	return pFrustum;
+}
+
+int Renderer::PointInFrustum(unsigned int frustumid, const Vector3d &point)
+{
+	Frustum* pFrustum = m_frustums[frustumid];
+
+	return pFrustum->PointInFrustum(point);
+}
+
+int Renderer::SphereInFrustum(unsigned int frustumid, const Vector3d &point, float radius)
+{
+	Frustum* pFrustum = m_frustums[frustumid];
+
+	return pFrustum->SphereInFrustum(point, radius);
+}
+
+int Renderer::CubeInFrustum(unsigned int frustumid, const Vector3d &center, float x, float y, float z)
+{
+	Frustum* pFrustum = m_frustums[frustumid];
+
+	return pFrustum->CubeInFrustum(center, x, y, z);
 }

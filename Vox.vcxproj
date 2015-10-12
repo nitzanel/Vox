@@ -32,14 +32,25 @@
     <ClCompile Include="source\Maths\quaternion.cpp" />
     <ClCompile Include="source\Maths\vector2d.cpp" />
     <ClCompile Include="source\Maths\vector3d.cpp" />
+    <ClCompile Include="source\models\BoundingBox.cpp" />
+    <ClCompile Include="source\models\MS3DAnimator.cpp" />
+    <ClCompile Include="source\models\MS3DModel.cpp" />
+    <ClCompile Include="source\models\objmodel.cpp" />
+    <ClCompile Include="source\models\QubicleBinary.cpp" />
+    <ClCompile Include="source\models\QubicleBinaryManager.cpp" />
+    <ClCompile Include="source\models\VoxelCharacter.cpp" />
+    <ClCompile Include="source\models\VoxelObject.cpp" />
+    <ClCompile Include="source\models\VoxelWeapon.cpp" />
     <ClCompile Include="source\Renderer\bmp.cpp" />
     <ClCompile Include="source\Renderer\bmp_class.cpp" />
+    <ClCompile Include="source\Renderer\camera.cpp" />
     <ClCompile Include="source\Renderer\colour.cpp" />
     <ClCompile Include="source\Renderer\frustum.cpp" />
     <ClCompile Include="source\Renderer\mesh.cpp" />
     <ClCompile Include="source\Renderer\Renderer.cpp" />
     <ClCompile Include="source\Renderer\texture.cpp" />
     <ClCompile Include="source\Renderer\tga.cpp" />
+    <ClCompile Include="source\utils\Interpolator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\freetype\freetypefont.h" />
@@ -48,7 +59,18 @@
     <ClInclude Include="source\glew\include\GL\wglew.h" />
     <ClInclude Include="source\Maths\3dGeometry.h" />
     <ClInclude Include="source\Maths\3dmaths.h" />
+    <ClInclude Include="source\models\BoundingBox.h" />
+    <ClInclude Include="source\models\modelloader.h" />
+    <ClInclude Include="source\models\MS3DAnimator.h" />
+    <ClInclude Include="source\models\MS3DModel.h" />
+    <ClInclude Include="source\models\OBJModel.h" />
+    <ClInclude Include="source\models\QubicleBinary.h" />
+    <ClInclude Include="source\models\QubicleBinaryManager.h" />
+    <ClInclude Include="source\models\VoxelCharacter.h" />
+    <ClInclude Include="source\models\VoxelObject.h" />
+    <ClInclude Include="source\models\VoxelWeapon.h" />
     <ClInclude Include="source\Renderer\bmp_class.h" />
+    <ClInclude Include="source\Renderer\camera.h" />
     <ClInclude Include="source\Renderer\colour.h" />
     <ClInclude Include="source\Renderer\frustum.h" />
     <ClInclude Include="source\Renderer\light.h" />
@@ -59,6 +81,8 @@
     <ClInclude Include="source\Renderer\tga.h" />
     <ClInclude Include="source\Renderer\vertexarray.h" />
     <ClInclude Include="source\Renderer\viewport.h" />
+    <ClInclude Include="source\utils\Interpolator.h" />
+    <ClInclude Include="source\utils\Random.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4496164E-D363-42DC-84E8-64D61B812689}</ProjectGuid>

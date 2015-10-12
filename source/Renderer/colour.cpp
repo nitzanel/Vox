@@ -3,8 +3,8 @@
 #include <cmath>
 
 #ifdef _MSC_VER
-#define INFINITY (FLT_MAX+FLT_MAX)
-#define NAN (INFINITY-INFINITY)
+#define _INFINITY (FLT_MAX+FLT_MAX)
+#define _NAN (INFINITY-INFINITY)
 #endif
 
 void Colour::RGBToHSV(float r, float g, float b, float *h, float *s, float *v)

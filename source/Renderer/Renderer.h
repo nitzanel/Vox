@@ -72,6 +72,40 @@ enum CullMode
 	CM_FRONT
 };
 
+enum BlendFunction
+{
+	BF_ONE = 0,
+	BF_ZERO,
+	BF_ONE_MINUS_SRC_ALPHA,
+	BF_SRC_ALPHA
+};
+
+enum DepthTest
+{
+	DT_NEVER = 0,
+	DT_ALWAYS,
+	DT_LESS,
+	DT_LEQUAL,
+	DT_EQUAL,
+	DT_GEQUAL,
+	DT_GREATER,
+	DT_NOTEQUAL,
+};
+
+enum ImmediateModePrimitive
+{
+	IM_POINTS = 0,
+	IM_LINES,
+	IM_LINE_LOOP,
+	IM_LINE_STRIP,
+	IM_TRIANGLES,
+	IM_TRIANGLE_STRIP,
+	IM_TRIANGLE_FAN,
+	IM_QUADS,
+	IM_QUAD_STRIP,
+	IM_POLYGON
+};
+
 struct OGLPositionVertex
 {
 	float x, y, z; // Position.
@@ -121,12 +155,15 @@ public:
 	// Viewport
 	bool CreateViewport(int bottom, int left, int width, int height, float fov, unsigned int *pID);
 	bool ResizeViewport(unsigned int viewportid, int bottom, int left, int width, int height, float fov);
+	int GetActiveViewPort();
 
 	// Render modes
 	void SetRenderMode(RenderMode mode);
 	void SetPrimativeMode(PrimativeMode mode);
 	void SetCullMode(CullMode mode);
 	CullMode GetCullMode();
+	void SetLineWidth(float width);
+	void SetPointSize(float width);
 
 	// Projection
 	bool SetProjectionMode(ProjectionMode mode, int viewPort);
@@ -144,10 +181,45 @@ public:
 
 	// Matrix manipulations
 	void SetWorldMatrix(const Matrix4x4 &mat);
+	void GetModelViewMatrix(Matrix4x4 *pMat);
+	void GetModelMatrix(Matrix4x4 *pMat);
+	void GetViewMatrix(Matrix4x4 *pMat);
+	void GetProjectionMatrix(Matrix4x4 *pMat);
 	void IdentityWorldMatrix();
+	void MultiplyWorldMatrix(const Matrix4x4 &mat);
+	void TranslateWorldMatrix(float x, float y, float z);
+	void RotateWorldMatrix(float x, float y, float z);
+	void ScaleWorldMatrix(float x, float y, float z);
+
+	// Texture matrix manipulations
+	void SetTextureMatrix();
+	void PushTextureMatrix();
+	void PopTextureMatrix();
 
 	// Camera functionality
 	void SetLookAtCamera(Vector3d pos, Vector3d target, Vector3d up);
+
+	// Transparency
+	void EnableTransparency(BlendFunction source, BlendFunction destination);
+	void DisableTransparency();
+	GLenum GetBlendEnum(BlendFunction flag);
+
+	// Depth testing
+	void EnableDepthTest(DepthTest lTestFunction);
+	void DisableDepthTest();
+	GLenum GetDepthTest(DepthTest lTest);
+	void EnableDepthWrite();
+	void DisableDepthWrite();
+
+	// Immediate mode
+	void EnableImmediateMode(ImmediateModePrimitive mode);
+	void ImmediateVertex(float x, float y, float z);
+	void ImmediateVertex(int x, int y, int z);
+	void ImmediateNormal(float x, float y, float z);
+	void ImmediateNormal(int x, int y, int z);
+	void ImmediateTextureCoordinate(float s, float t);
+	void ImmediateColourAlpha(float r, float g, float b, float a);
+	void DisableImmediateMode();
 
 	// Text rendering
 	bool CreateFreeTypeFont(char *fontName, int fontSize, unsigned int *pID);
@@ -211,6 +283,22 @@ public:
 	void RenderMesh(OpenGLTriangleMesh* pMesh);
 	void RenderMesh_NoColour(OpenGLTriangleMesh* pMesh);
 	void GetMeshInformation(int *numVerts, int *numTris, OpenGLTriangleMesh* pMesh);
+	void StartMeshRender();
+	void EndMeshRender();
+	bool MeshStaticBufferRender(OpenGLTriangleMesh* pMesh);
+
+	// Name rendering and name picking
+	void InitNameStack();
+	void LoadNameOntoStack(int lName);
+	void EndNameStack();
+	void StartNamePicking(unsigned int lViewportid, int lX, int lY);
+	int  GetPickedObject();
+
+	// Frustum
+	Frustum* GetFrustum(unsigned int frustumid);
+	int PointInFrustum(unsigned int frustumid, const Vector3d &point);
+	int SphereInFrustum(unsigned int frustumid, const Vector3d &point, float radius);
+	int CubeInFrustum(unsigned int frustumid, const Vector3d &center, float x, float y, float z);
 
 protected:
 	/* Protected methods */
@@ -245,6 +333,7 @@ private:
 
 	// Viewports
 	vector<Viewport *> m_viewports;
+	unsigned int m_activeViewport;
 
 	// Frustums
 	vector<Frustum *> m_frustums; // Note : We store a frustum for each viewport, therefore viewport and frustum are closely linked (See viewport functions)
@@ -271,4 +360,8 @@ private:
 
 	// Model stack
 	vector<Matrix4x4> m_modelStack;
+
+	// Name picking
+	static const int NAME_PICKING_BUFFER = 64;
+	unsigned int m_SelectBuffer[NAME_PICKING_BUFFER];
 };

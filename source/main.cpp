@@ -1,4 +1,6 @@
 #include "Renderer/Renderer.h"
+#include "Renderer/camera.h"
+#include "utils/Interpolator.h"
 
 #include <windows.h>
 #include <gl/gl.h>
@@ -40,18 +42,25 @@ int main(void)
 	
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
-	//glfwSwapInterval(0); // Disable v-sync
+	glfwSwapInterval(0); // Disable v-sync
 
 	/* Create the renderer */
 	Renderer* pRenderer = new Renderer(windowWidth, windowHeight, 32, 8);
 
-	// Create game viewport
-	unsigned int m_defaultViewport;
-	pRenderer->CreateViewport(0, 0, windowWidth, windowHeight, 60.0f, &m_defaultViewport);
+	/* Create cameras */
+	Camera* pGameCamera = new Camera(pRenderer);
+	pGameCamera->SetPosition(Vector3d(0.0f, 0.0f, 3.0f));
+	pGameCamera->SetFacing(Vector3d(0.0f, 0.0f, -1.0f));
+	pGameCamera->SetUp(Vector3d(0.0f, 1.0f, 0.0f));
+	pGameCamera->SetRight(Vector3d(1.0f, 0.0f, 0.0f));
+
+	/* Create viewports */
+	unsigned int defaultViewport;
+	pRenderer->CreateViewport(0, 0, windowWidth, windowHeight, 60.0f, &defaultViewport);
 
 	/* Create fonts */
-	unsigned int m_defaultFont;
-	pRenderer->CreateFreeTypeFont("media/fonts/arial.ttf", 12, &m_defaultFont);
+	unsigned int defaultFont;
+	pRenderer->CreateFreeTypeFont("media/fonts/arial.ttf", 12, &defaultFont);
 
 	/* Setup the FPS counters */
 	LARGE_INTEGER fps_previousTicks;
@@ -74,19 +83,26 @@ int main(void)
 		float fps = 1.0f / ((float)(fps_currentTicks.QuadPart - fps_previousTicks.QuadPart) / (float)fps_ticksPerSecond.QuadPart);
 		fps_previousTicks = fps_currentTicks;
 
+		// Update interpolator singleton
+		Interpolator::GetInstance()->Update();
+
+		// Begin rendering
 		pRenderer->BeginScene(true, true, true);
 
 		pRenderer->PushMatrix();
-			pRenderer->SetProjectionMode(PM_2D, m_defaultViewport);
-			pRenderer->SetLookAtCamera(Vector3d(0.0f, 0.0f, 50.0f), Vector3d(0.0f, 0.0f, 0.0f), Vector3d(0.0f, 1.0f, 0.0f));
+			// Set the default projection mode
+			pRenderer->SetProjectionMode(PM_PERSPECTIVE, defaultViewport);
+
+			// Set the lookat camera
+			pGameCamera->Look();
 
 			glBegin(GL_TRIANGLES);
 				glColor3f(1.0f, 0.0f, 0.0f);
-				glVertex3f(50.0f, 50.0f, 0.0);
+				glVertex3f(-1.0f, -1.0f, 0.0);
 				glColor3f(0.0f, 1.0f, 0.0f);
-				glVertex3f(100.0f, 50.0f, 0.0f);
+				glVertex3f(1.0f, -1.0f, 0.0f);
 				glColor3f(0.0f, 0.0f, 1.0f);
-				glVertex3f(75.0f, 100.0f, 0.0f);
+				glVertex3f(0.0f, 0.75f, 0.0f);
 			glEnd();
 
 		pRenderer->PopMatrix();
@@ -95,12 +111,13 @@ int main(void)
 		sprintf_s(lFPSBuff, "FPS: %.0f  Delta: %.4f", fps, deltaTime);
 
 		pRenderer->PushMatrix();
-			pRenderer->SetProjectionMode(PM_2D, m_defaultViewport);
+			pRenderer->SetProjectionMode(PM_2D, defaultViewport);
 			pRenderer->SetLookAtCamera(Vector3d(0.0f, 0.0f, 50.0f), Vector3d(0.0f, 0.0f, 0.0f), Vector3d(0.0f, 1.0f, 0.0f));
 
-			pRenderer->RenderFreeTypeText(m_defaultFont, 10.0f, 10.0f, 0.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, lFPSBuff);
+			pRenderer->RenderFreeTypeText(defaultFont, 10.0f, 10.0f, 0.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, lFPSBuff);
 		pRenderer->PopMatrix();
 
+		// End rendering
 		pRenderer->EndScene();
 
 		/* Swap front and back buffers */
