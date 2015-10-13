@@ -17,6 +17,12 @@
 
 #include <GLFW/glfw3.h>
 
+#include "input.h"
+
+bool modelWireframe = false;
+bool modelTalking = false;
+int modelAnimationIndex = 0;
+VoxelCharacter* pVoxelCharacter = NULL;
 
 int main(void)
 {
@@ -35,6 +41,10 @@ int main(void)
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+
+	/* Input callbacks */
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	/* Center on screen */
 	int width;
@@ -75,7 +85,7 @@ int main(void)
 	QubicleBinaryManager* pQubicleBinaryManager = new QubicleBinaryManager(pRenderer);
 
 	/* Create test voxel character */
-	VoxelCharacter* pVoxelCharacter = new VoxelCharacter(pRenderer, pQubicleBinaryManager);
+	pVoxelCharacter = new VoxelCharacter(pRenderer, pQubicleBinaryManager);
 	char characterBaseFolder[128];
 	char qbFilename[128];
 	char ms3dFilename[128];
@@ -98,6 +108,7 @@ int main(void)
 	pVoxelCharacter->SetRandomLookDirection(true);
 	pVoxelCharacter->SetWireFrameRender(false);
 	pVoxelCharacter->SetCharacterScale(0.08f);
+	pVoxelCharacter->LoadRightWeapon("media/gamedata/weapons/Sword/Sword.weapon");
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -160,18 +171,27 @@ int main(void)
 		// ---------------------------------------
 		// Render 2d
 		// ---------------------------------------
-		glActiveTextureARB(GL_TEXTURE0_ARB);
-		glDisable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, 0);
 		char lFPSBuff[128];
 		sprintf_s(lFPSBuff, "FPS: %.0f  Delta: %.4f", fps, deltaTime);
+		char lAnimationBuff[128];
+		sprintf_s(lAnimationBuff, "Animation: %s [%i/%i]", pVoxelCharacter->GetAnimationName(modelAnimationIndex), modelAnimationIndex, pVoxelCharacter->GetNumAnimations()-1);
 
 		pRenderer->PushMatrix();
+			glActiveTextureARB(GL_TEXTURE0_ARB);
+			glDisable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
 			pRenderer->SetRenderMode(RM_SOLID);
 			pRenderer->SetProjectionMode(PM_2D, defaultViewport);
 			pRenderer->SetLookAtCamera(Vector3d(0.0f, 0.0f, 50.0f), Vector3d(0.0f, 0.0f, 0.0f), Vector3d(0.0f, 1.0f, 0.0f));
 
-			pRenderer->RenderFreeTypeText(defaultFont, 10.0f, 10.0f, 0.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, lFPSBuff);
+			pRenderer->RenderFreeTypeText(defaultFont, 15.0f, 15.0f, 1.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, lFPSBuff);
+
+			pRenderer->RenderFreeTypeText(defaultFont, 335.0f, 15.0f, 1.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, lAnimationBuff);
+
+			pRenderer->RenderFreeTypeText(defaultFont, 635.0f, 55.0f, 1.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, "E - Toggle Talking");
+			pRenderer->RenderFreeTypeText(defaultFont, 635.0f, 35.0f, 1.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, "W - Toggle wireframe");
+			pRenderer->RenderFreeTypeText(defaultFont, 635.0f, 15.0f, 1.0f, Colour(1.0f, 1.0f, 1.0f), 1.0f, "Q - Cycle Animations");
 		pRenderer->PopMatrix();
 
 		// End rendering

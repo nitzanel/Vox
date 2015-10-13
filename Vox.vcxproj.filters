@@ -33,9 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\main.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="source\glew\src\glew.c">
       <Filter>source\glew\src</Filter>
     </ClCompile>
@@ -129,6 +126,12 @@
     <ClCompile Include="source\Renderer\camera.cpp">
       <Filter>source\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="source\input.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\glew\include\GL\glew.h">
@@ -220,6 +223,9 @@
     </ClInclude>
     <ClInclude Include="source\Renderer\camera.h">
       <Filter>source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="source\input.h">
+      <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

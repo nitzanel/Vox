@@ -818,7 +818,7 @@ int Renderer::GetFreeTypeTextWidth(unsigned int fontID, char *inText, ...)
 
 	// Loop through variable argument list and add them to the string
 	va_start(ap, inText);
-	vsprintf_s(outText, inText, ap);
+		vsprintf_s(outText, inText, ap);
 	va_end(ap);
 
 	return m_freetypeFonts[fontID]->GetTextWidth(outText);
